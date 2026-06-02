@@ -1,0 +1,8 @@
+name: edu2sql
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - -e .[dev]

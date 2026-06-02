@@ -1,0 +1,58 @@
+app:
+  name: Edu2SQL
+  environment: development
+
+database:
+  driver: postgresql
+  url: postgresql:///edu2sql
+  host:
+  port: 5432
+  name: edu2sql
+  user:
+  readonly:
+    allowed_prefixes:
+      - select
+      - explain
+      - show
+      - with
+    max_rows: 50
+
+llm:
+  provider: openai
+  model: gpt-4.1-mini
+  temperature: 0.0
+  max_turns: 15
+
+pipeline:
+  enable_clarification: true
+  enable_sql_validation: true
+  max_clarification_rounds: 2
+
+education_concepts:
+  engagement:
+    label: 참여도
+    candidate_metrics:
+      - lms_login_count
+      - assignment_submission_rate
+      - discussion_post_count
+      - video_watch_time
+      - combined_engagement_score
+  achievement:
+    label: 성취도
+    candidate_metrics:
+      - quiz_score
+      - assignment_score
+      - final_grade
+  at_risk:
+    label: 위험군
+    candidate_metrics:
+      - low_engagement
+      - low_achievement
+      - missing_submissions
+
+evaluation:
+  metrics:
+    - execution_accuracy
+    - clarification_quality
+    - unnecessary_clarification_count
+    - educational_intent_alignment

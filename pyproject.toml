@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=69.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "edu2sql"
+version = "0.1.0"
+description = "A basic education-domain NL2SQL project skeleton."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=0.40.0",
+    "openai>=1.50.0",
+    "pandas>=2.2.0",
+    "psycopg2-binary>=2.9.9",
+    "python-dotenv>=1.0.1",
+    "pyyaml>=6.0.1",
+    "sqlalchemy>=2.0.0",
+    "streamlit>=1.35.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.5.0",
+]
+
+[project.scripts]
+edu2sql-db-check = "edu2sql.db:main"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
