@@ -1,0 +1,363 @@
+{
+  "database": {
+    "name": "edu2sql_lms",
+    "description": "NL2SQL PoC용 LMS 데이터베이스. 학생, 수업, 활동, 제출, 활동 로그, 접속 로그를 조회한다.",
+    "default_assumptions": {
+      "date_range": "기간이 명시되지 않으면 전체 기간 기준으로 조회한다.",
+      "class_scope": "학년/반이 명시되지 않으면 전체 학생 기준으로 조회한다.",
+      "limit": "목록 조회는 기본 LIMIT 50, 순위 조회는 기본 LIMIT 10을 적용한다."
+    }
+  },
+  "tables": {
+    "users": {
+      "description": "학생, 교사, 관리자 정보. 학생의 소속 학년/반도 이 테이블에 직접 저장한다.",
+      "primary_key": "user_id",
+      "columns": {
+        "user_id": "사용자 UUID",
+        "login_id": "로그인 ID",
+        "email": "이메일",
+        "name": "사용자 이름",
+        "role": "사용자 역할. student, teacher, admin 중 하나",
+        "school_year": "학생 소속 학년도. 교사/관리자는 NULL 가능",
+        "grade": "학생 학년. 교사/관리자는 NULL 가능",
+        "class_number": "학생 반 번호. 교사/관리자는 NULL 가능",
+        "created_at": "계정 생성 시각",
+        "last_login_at": "마지막 로그인 시각"
+      },
+      "common_filters": [
+        "role = 'student'",
+        "grade = 3",
+        "class_number = 2"
+      ]
+    },
+    "sessions": {
+      "description": "실제 수업 차시. 기존 courses와 course_sessions를 합친 PoC용 단순 테이블이다.",
+      "primary_key": "session_id",
+      "columns": {
+        "session_id": "수업 차시 UUID",
+        "teacher_id": "담당 교사 user_id",
+        "school_year": "수업 대상 학년도",
+        "grade": "수업 대상 학년",
+        "class_number": "수업 대상 반 번호",
+        "subject": "과목명. 예: 과학, 국어, 수학",
+        "unit_name": "단원명",
+        "title": "수업 차시 제목",
+        "session_date": "수업 날짜",
+        "period": "교시",
+        "started_at": "수업 시작 시각",
+        "ended_at": "수업 종료 시각",
+        "status": "수업 상태. scheduled, live, ended, cancelled 중 하나",
+        "created_at": "수업 차시 생성 시각"
+      },
+      "common_filters": [
+        "subject = '과학'",
+        "grade = 3",
+        "class_number = 2",
+        "session_date >= DATE '2026-05-01'",
+        "session_date < DATE '2026-06-01'"
+      ]
+    },
+    "activities": {
+      "description": "퀴즈, 읽기, 글쓰기, 토론, AI 글쓰기 등 활동 원형",
+      "primary_key": "activity_id",
+      "columns": {
+        "activity_id": "활동 UUID",
+        "creator_id": "활동 생성자 user_id",
+        "activity_type": "활동 유형. reading, quiz, writing, discussion, ai_writing, external_page 중 하나",
+        "title": "활동 제목",
+        "description": "활동 설명",
+        "material_title": "활동 자료 제목",
+        "material_url": "활동 자료 URL",
+        "metadata": "활동별 추가 메타데이터 JSON",
+        "created_at": "활동 생성 시각"
+      },
+      "allowed_activity_types": [
+        "reading",
+        "quiz",
+        "writing",
+        "discussion",
+        "ai_writing",
+        "external_page"
+      ]
+    },
+    "activity_runs": {
+      "description": "특정 수업 차시에서 실제 실행된 활동",
+      "primary_key": "run_id",
+      "columns": {
+        "run_id": "활동 실행 UUID",
+        "activity_id": "활동 원형 ID",
+        "session_id": "수업 차시 ID",
+        "assigned_by": "활동 실행 또는 배정 교사 user_id",
+        "started_at": "활동 시작 시각",
+        "ended_at": "활동 종료 시각",
+        "status": "활동 실행 상태. ready, running, closed 중 하나",
+        "display_order": "수업 내 활동 순서"
+      }
+    },
+    "submissions": {
+      "description": "학생별 활동 제출 상태, 점수, 제출 내용",
+      "primary_key": "submission_id",
+      "columns": {
+        "submission_id": "제출 UUID",
+        "run_id": "활동 실행 ID",
+        "student_id": "학생 user_id",
+        "status": "제출 상태. assigned, in_progress, submitted, returned, retry 중 하나",
+        "attempt_no": "시도 번호",
+        "content": "제출 내용 JSON",
+        "score": "점수",
+        "feedback": "교사 피드백",
+        "started_at": "학생이 활동을 시작한 시각",
+        "submitted_at": "학생이 제출한 시각",
+        "updated_at": "제출 데이터 최종 수정 시각"
+      },
+      "common_filters": [
+        "status = 'submitted'",
+        "status <> 'submitted'",
+        "score IS NOT NULL"
+      ]
+    },
+    "activity_logs": {
+      "description": "활동 중 발생한 학생 행동 로그",
+      "primary_key": "log_id",
+      "columns": {
+        "log_id": "활동 로그 UUID",
+        "run_id": "활동 실행 ID",
+        "user_id": "행동한 사용자 ID",
+        "event_type": "행동 유형. 예: activity_started, page_viewed, question_answered, text_typed, ai_message_sent",
+        "section": "행동이 발생한 영역. 예: reading, quiz, writing, ai_writing, discussion",
+        "target_type": "행동 대상 유형",
+        "target_id": "행동 대상 ID",
+        "value_text": "문자형 값",
+        "value_number": "숫자형 값",
+        "duration_ms": "행동 지속 시간, 밀리초",
+        "payload": "세부 로그 JSON",
+        "occurred_at": "행동 발생 시각",
+        "created_at": "로그 저장 시각"
+      },
+      "common_event_types": [
+        "activity_started",
+        "activity_completed",
+        "page_viewed",
+        "question_answered",
+        "text_typed",
+        "text_deleted",
+        "pasted",
+        "scrolled",
+        "discussion_posted",
+        "discussion_commented",
+        "ai_message_sent",
+        "ai_message_received"
+      ]
+    },
+    "access_logs": {
+      "description": "로그인, 로그아웃, 수업 입장, 페이지 이동 같은 시스템 접속 로그",
+      "primary_key": "access_log_id",
+      "columns": {
+        "access_log_id": "접속 로그 UUID",
+        "user_id": "사용자 ID",
+        "session_id": "관련 수업 차시 ID",
+        "action": "접속 행동. login, logout, join_session, leave_session, navigate, open_material 중 하나",
+        "page_path": "접속 페이지 경로",
+        "ip_address": "IP 주소",
+        "user_agent": "브라우저 user-agent",
+        "device_type": "기기 유형",
+        "occurred_at": "접속 행동 발생 시각"
+      },
+      "common_actions": [
+        "login",
+        "logout",
+        "join_session",
+        "leave_session",
+        "navigate",
+        "open_material"
+      ]
+    },
+    "quiz_answers": {
+      "description": "퀴즈 문항별 학생 답안. 문항/선택지 테이블을 분리하지 않은 PoC용 단순 구조",
+      "primary_key": "answer_id",
+      "columns": {
+        "answer_id": "퀴즈 답안 UUID",
+        "run_id": "퀴즈 활동 실행 ID",
+        "student_id": "학생 user_id",
+        "submission_id": "관련 제출 ID",
+        "question_no": "문항 번호",
+        "question_text": "문항 내용",
+        "selected_answer": "학생 선택 답",
+        "correct_answer": "정답",
+        "is_correct": "정답 여부",
+        "answered_at": "답변 시각"
+      }
+    },
+    "discussion_posts": {
+      "description": "토론 글과 댓글. parent_post_id가 있으면 댓글, 없으면 원글",
+      "primary_key": "post_id",
+      "columns": {
+        "post_id": "토론 글 UUID",
+        "run_id": "토론 활동 실행 ID",
+        "author_id": "작성자 user_id",
+        "parent_post_id": "부모 글 ID. NULL이면 원글",
+        "space_name": "토론 공간 이름. 예: 찬성, 반대, 질문",
+        "body": "본문",
+        "created_at": "작성 시각",
+        "updated_at": "수정 시각"
+      }
+    },
+    "writing_submissions": {
+      "description": "글쓰기 또는 AI 글쓰기 활동에서 학생이 최종 제출한 글 본문과 세부 결과",
+      "primary_key": "writing_submission_id",
+      "columns": {
+        "writing_submission_id": "글쓰기 제출 결과 UUID",
+        "run_id": "글쓰기 활동 실행 ID",
+        "student_id": "학생 user_id",
+        "submission_id": "관련 제출 ID",
+        "title": "글 제목",
+        "body": "최종 제출 글 본문",
+        "char_count": "글자 수",
+        "revision_no": "제출 버전 번호",
+        "submitted_at": "글 제출 시각",
+        "created_at": "레코드 생성 시각",
+        "updated_at": "레코드 수정 시각"
+      }
+    }
+  },
+  "join_paths": [
+    {
+      "name": "student_submissions",
+      "description": "학생별 제출 결과 조회",
+      "tables": ["users", "submissions", "activity_runs", "activities"],
+      "joins": [
+        "submissions.student_id = users.user_id",
+        "submissions.run_id = activity_runs.run_id",
+        "activity_runs.activity_id = activities.activity_id"
+      ]
+    },
+    {
+      "name": "session_activity_runs",
+      "description": "수업 차시별 실행 활동 조회",
+      "tables": ["sessions", "activity_runs", "activities"],
+      "joins": [
+        "activity_runs.session_id = sessions.session_id",
+        "activity_runs.activity_id = activities.activity_id"
+      ]
+    },
+    {
+      "name": "activity_logs_by_student",
+      "description": "학생별 활동 로그 조회",
+      "tables": ["users", "activity_logs", "activity_runs", "activities"],
+      "joins": [
+        "activity_logs.user_id = users.user_id",
+        "activity_logs.run_id = activity_runs.run_id",
+        "activity_runs.activity_id = activities.activity_id"
+      ]
+    },
+    {
+      "name": "access_logs_by_session",
+      "description": "수업 차시별 접속 로그 조회",
+      "tables": ["access_logs", "users", "sessions"],
+      "joins": [
+        "access_logs.user_id = users.user_id",
+        "access_logs.session_id = sessions.session_id"
+      ]
+    },
+    {
+      "name": "quiz_answers_with_activity",
+      "description": "퀴즈 정답률과 문항별 답안 조회",
+      "tables": ["quiz_answers", "users", "activity_runs", "activities"],
+      "joins": [
+        "quiz_answers.student_id = users.user_id",
+        "quiz_answers.run_id = activity_runs.run_id",
+        "activity_runs.activity_id = activities.activity_id"
+      ]
+    },
+    {
+      "name": "writing_results_by_student",
+      "description": "학생별 글쓰기 제출 결과 조회",
+      "tables": ["writing_submissions", "users", "activity_runs", "activities"],
+      "joins": [
+        "writing_submissions.student_id = users.user_id",
+        "writing_submissions.run_id = activity_runs.run_id",
+        "activity_runs.activity_id = activities.activity_id"
+      ]
+    }
+  ],
+  "metric_mappings": {
+    "제출률": {
+      "description": "제출 완료 건수 / 전체 배정 제출 건수",
+      "sql_hint": "COUNT(*) FILTER (WHERE submissions.status = 'submitted')::numeric / NULLIF(COUNT(*), 0)"
+    },
+    "미제출": {
+      "description": "제출 상태가 submitted가 아닌 제출",
+      "sql_hint": "submissions.status <> 'submitted'"
+    },
+    "평균 점수": {
+      "description": "제출 점수 평균",
+      "sql_hint": "AVG(submissions.score)"
+    },
+    "정답률": {
+      "description": "퀴즈 답안 중 정답 비율",
+      "sql_hint": "COUNT(*) FILTER (WHERE quiz_answers.is_correct)::numeric / NULLIF(COUNT(*), 0)"
+    },
+    "글쓰기 분량": {
+      "description": "글쓰기 제출 결과의 글자 수",
+      "sql_hint": "SUM(writing_submissions.char_count) 또는 AVG(writing_submissions.char_count)"
+    },
+    "글쓰기 제출 수": {
+      "description": "학생이 제출한 글쓰기 결과 개수",
+      "sql_hint": "COUNT(writing_submissions.writing_submission_id)"
+    },
+    "읽기 시간": {
+      "description": "읽기 활동 page_viewed 로그의 duration_ms 합계",
+      "sql_hint": "SUM(activity_logs.duration_ms) WHERE activity_logs.event_type = 'page_viewed'"
+    },
+    "참여율": {
+      "description": "모호한 지표. 접속 기준, 활동 시작 기준, 제출 기준 중 명료화가 필요하다.",
+      "sql_hint": "clarify before SQL generation"
+    },
+    "접속 횟수": {
+      "description": "로그인 또는 수업 입장 로그 수",
+      "sql_hint": "COUNT(access_logs.access_log_id) WHERE access_logs.action IN ('login', 'join_session')"
+    },
+    "토론 참여량": {
+      "description": "토론 글과 댓글 작성 수",
+      "sql_hint": "COUNT(discussion_posts.post_id)"
+    }
+  },
+  "term_mappings": {
+    "학생": "users.role = 'student'",
+    "교사": "users.role = 'teacher'",
+    "학년": "users.grade 또는 sessions.grade",
+    "반": "users.class_number 또는 sessions.class_number",
+    "학급": "users.school_year/grade/class_number 또는 sessions.school_year/grade/class_number",
+    "수업": "sessions",
+    "과목": "sessions.subject",
+    "차시": "sessions",
+    "활동": "activities 또는 activity_runs",
+    "실행된 활동": "activity_runs",
+    "퀴즈": "activities.activity_type = 'quiz'",
+    "읽기": "activities.activity_type = 'reading'",
+    "글쓰기": "activities.activity_type IN ('writing', 'ai_writing')",
+    "AI 글쓰기": "activities.activity_type = 'ai_writing'",
+    "토론": "activities.activity_type = 'discussion'",
+    "제출": "submissions",
+    "로그": "activity_logs",
+    "접속": "access_logs",
+    "글쓰기 제출 글": "writing_submissions",
+    "최종 글": "writing_submissions",
+    "글자 수": "writing_submissions.char_count"
+  },
+  "date_mappings": {
+    "이번 달": "created_at >= date_trunc('month', CURRENT_DATE)",
+    "최근 7일": "created_at >= CURRENT_DATE - INTERVAL '7 days'",
+    "오늘": "created_at >= CURRENT_DATE AND created_at < CURRENT_DATE + INTERVAL '1 day'",
+    "전체 기간": "no date filter"
+  },
+  "sql_generation_rules": [
+    "SELECT 또는 WITH 쿼리만 생성한다.",
+    "사용자가 수정/삭제/생성을 요청해도 읽기 전용 조회로 제한한다.",
+    "목록 조회에는 LIMIT 50을 기본 적용한다.",
+    "순위 조회에는 LIMIT 10을 기본 적용한다.",
+    "기간이 생략되면 전체 기간 기준으로 조회하고 assumptions에 명시한다.",
+    "학년/반이 생략되면 전체 학생 기준으로 조회하고 assumptions에 명시한다.",
+    "참여율, 최근, 많이 쓴, 잘한 같은 표현이 모호하면 SQL 생성 전에 명료화한다."
+  ]
+}
