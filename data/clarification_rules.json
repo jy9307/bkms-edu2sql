@@ -1,7 +1,7 @@
 [
   {
     "id": "absurd_personality",
-    "type": "absurd",
+    "type": "absurd_recoverable",
     "trigger_keywords": ["성격", "착한", "나쁜", "친구 관계", "분위기"],
     "missing_slot": "performance_metric",
     "question": "학생 성격이나 관계는 데이터로 확인하기 어려워요. 대신 어떤 데이터를 볼까요?",
@@ -11,7 +11,7 @@
   },
   {
     "id": "absurd_prediction",
-    "type": "absurd",
+    "type": "absurd_recoverable",
     "trigger_keywords": ["앞으로", "예측", "될 것 같아", "잘 할 것 같아", "가능성"],
     "missing_slot": "performance_metric",
     "question": "미래 예측은 어렵지만, 지금까지의 데이터로 가늠해볼 수 있어요. 어떤 기준으로 볼까요?",
@@ -21,7 +21,7 @@
   },
   {
     "id": "absurd_emotion",
-    "type": "absurd",
+    "type": "absurd_recoverable",
     "trigger_keywords": ["힘들어 보여", "지쳐", "스트레스", "행복", "즐거워"],
     "missing_slot": "engagement_metric",
     "question": "감정 상태는 직접 알기 어렵지만, 행동 데이터로 간접적으로 볼 수 있어요. 어떤 걸 볼까요?",
@@ -32,26 +32,22 @@
   {
     "id": "absurd_comparison_external",
     "type": "absurd",
+    "action": "reject",
     "trigger_keywords": ["다른 학교", "전국", "평균이랑 비교", "서울 평균"],
-    "missing_slot": "comparison_scope",
-    "question": "외부 데이터는 없지만, 학교 내 기준으로 비교할 수 있어요. 어떤 범위로 볼까요?",
-    "options": ["같은 학년 전체", "같은 과목 전체", "지난 학기 대비"],
-    "default_if_skipped": "같은 학년 전체",
+    "reject_message": "외부 학교나 전국 데이터는 이 시스템에 없어요. 학교 내 데이터만 조회할 수 있어요.",
     "examples": ["우리 학교가 전국 평균보다 잘 하고 있어?", "다른 학교랑 비교해줘"]
   },
   {
     "id": "absurd_unrelated",
     "type": "absurd",
+    "action": "reject",
     "trigger_keywords": ["급식", "날씨", "뉴스", "주식", "오늘 뭐해"],
-    "missing_slot": "query_intent",
-    "question": "이 시스템은 LMS 학습 데이터만 조회할 수 있어요. 혹시 학생 데이터 중 궁금한 게 있으신가요?",
-    "options": ["학생 제출 현황", "수업 참여 현황", "활동별 점수 현황"],
-    "default_if_skipped": "학생 제출 현황",
+    "reject_message": "이 시스템은 LMS 학습 데이터만 조회할 수 있어요. 학생 학습 데이터에 대해 질문해주세요.",
     "examples": ["오늘 급식 뭐야?", "내일 날씨 어때?"]
   },
   {
     "id": "absurd_moral_judgment",
-    "type": "absurd",
+    "type": "absurd_recoverable",
     "trigger_keywords": ["게으른", "성실한", "열심히 하는", "불성실한"],
     "missing_slot": "performance_metric",
     "question": "성실함은 다양한 기준으로 볼 수 있어요. 어떤 데이터로 확인할까요?",
@@ -61,7 +57,7 @@
   },
   {
     "id": "absurd_teacher_evaluation",
-    "type": "absurd",
+    "type": "absurd_recoverable",
     "trigger_keywords": ["선생님이 잘 가르치나", "수업 퀄리티", "좋은 선생님"],
     "missing_slot": "session_metric",
     "question": "수업 퀄리티는 직접 평가하기 어렵지만, 수업 관련 데이터를 볼 수 있어요. 어떤 걸 볼까요?",
