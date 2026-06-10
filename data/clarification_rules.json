@@ -1,5 +1,17 @@
 [
   {
+    "id": "missing_class",
+    "trigger_keywords": ["우리 반", "학생들", "반 학생", "학생 목록", "누구"],
+    "missing_slot": "class_scope",
+    "question": "몇 학년 몇 반을 기준으로 조회할까요?",
+    "options": ["3학년 2반", "전체 학급"],
+    "default_if_skipped": "전체 학급",
+    "priority": 5,
+    "examples": ["우리 반에서 퀴즈 안 낸 학생 보여줘", "학생들 명단 알려줘"]
+  },
+  {
+    "id": "ambiguous_recent",
+    "trigger_keywords": ["최근", "요즘", "요새", "최근에"],
     "id": "absurd_personality",
     "type": "absurd_recoverable",
     "trigger_keywords": ["성격", "착한", "나쁜", "친구 관계", "분위기"],
@@ -73,7 +85,8 @@
     "question": "\"최근\"은 어떤 기간을 의미하나요?",
     "options": ["최근 7일", "이번 달", "가장 최근 수업"],
     "default_if_skipped": "최근 7일",
-    "examples": ["최근 퀴즈 제출률 알려줘", "요즘 접속 많이 하는 학생 보여줘"]
+    "priority": 10,
+    "examples": ["최근 제출 현황 알려줘", "요즘 공부 열심히 하는 학생 누구야?"]
   },
   {
     "id": "ambiguous_participation_rate",
@@ -83,116 +96,37 @@
     "question": "참여율을 어떤 기준으로 계산할까요?",
     "options": ["수업 접속 기준", "활동 시작 기준", "제출 완료 기준"],
     "default_if_skipped": "활동 시작 기준",
-    "examples": ["지난주 과학 수업 참여율 알려줘", "3학년 참여도 어때?"]
+    "priority": 10,
+    "examples": ["참여율 높은 수업이 뭐야?", "우리 반 참여도 보여줘"]
   },
   {
-    "id": "ambiguous_good_student",
-    "type": "normal",
-    "trigger_keywords": ["잘한", "우수한", "상위", "공부 잘하는", "성적 좋은"],
+    "id": "ambiguous_performance",
+    "trigger_keywords": ["잘한", "우수한", "상위", "성적이 좋은"],
     "missing_slot": "performance_metric",
     "question": "잘한 학생을 어떤 기준으로 볼까요?",
     "options": ["평균 점수", "제출률", "활동 로그 수"],
     "default_if_skipped": "평균 점수",
-    "examples": ["과학 수업에서 잘한 학생 보여줘", "공부 잘하는 학생 누구야?"]
+    "priority": 10,
+    "examples": ["과학 수업에서 잘한 학생 보여줘", "성적이 좋은 학생 순위"]
   },
   {
     "id": "ambiguous_writing_length",
-    "type": "normal",
     "trigger_keywords": ["글쓰기 분량", "많이 쓴", "긴 글", "글자 수"],
     "missing_slot": "writing_length_metric",
     "question": "글쓰기 분량을 어떤 기준으로 계산할까요?",
     "options": ["글자 수 합계", "평균 글자 수", "제출 글 수"],
     "default_if_skipped": "글자 수 합계",
-    "examples": ["글쓰기 분량 많은 학생 순위 보여줘", "많이 쓴 학생 알려줘"]
+    "priority": 10,
+    "examples": ["글쓰기 분량 많은 학생 순위 보여줘"]
   },
   {
     "id": "ambiguous_reading_time",
-    "type": "normal",
-    "trigger_keywords": ["오래 읽은", "읽기 시간", "체류 시간", "읽기 많이"],
+    "trigger_keywords": ["오래 읽은", "읽기 시간", "체류 시간"],
     "missing_slot": "reading_time_metric",
-    "question": "읽기 시간은 어떤 기준으로 계산할까요?",
-    "options": ["page_viewed duration 합계", "page_viewed duration 평균"],
-    "default_if_skipped": "page_viewed duration 합계",
-    "examples": ["읽기 활동 오래 한 학생 보여줘", "체류 시간 긴 학생 순위"]
-  },
-  {
-    "id": "missing_class",
-    "type": "normal",
-    "trigger_keywords": ["우리 반", "학생들", "반 학생", "우리 학급"],
-    "missing_slot": "class_scope",
-    "question": "몇 학년 몇 반을 기준으로 조회할까요?",
-    "options": ["3학년 2반", "전체 학급"],
-    "default_if_skipped": "전체 학급",
-    "examples": ["우리 반에서 퀴즈 안 낸 학생 보여줘", "우리 학급 제출률 알려줘"]
-  },
-  {
-    "id": "missing_date_range",
-    "type": "normal",
-    "trigger_keywords": ["제출률", "평균", "순위", "참여율"],
-    "missing_slot": "date_range",
-    "question": "조회 기간을 지정할까요?",
-    "options": ["전체 기간", "이번 달", "최근 7일"],
-    "default_if_skipped": "전체 기간",
-    "examples": ["과학 수업 제출률 알려줘", "퀴즈 평균 점수 보여줘"]
-  },
-  {
-    "id": "ambiguous_active_student",
-    "type": "normal",
-    "trigger_keywords": ["활발한", "활동적인", "많이 한", "열심히 한"],
-    "missing_slot": "activity_metric",
-    "question": "활동량을 어떤 기준으로 볼까요?",
-    "options": ["활동 로그 수", "접속 횟수", "제출 완료 수"],
-    "default_if_skipped": "활동 로그 수",
-    "examples": ["가장 활발한 학생 보여줘", "활동 많이 한 학생 순위"]
-  },
-  {
-    "id": "ambiguous_struggling_student",
-    "type": "normal",
-    "trigger_keywords": ["못한", "어려워하는", "부진한", "낮은", "하위"],
-    "missing_slot": "performance_metric",
-    "question": "어려워하는 학생을 어떤 기준으로 볼까요?",
-    "options": ["평균 점수 하위", "미제출 횟수", "퀴즈 오답률"],
-    "default_if_skipped": "평균 점수 하위",
-    "examples": ["수학 어려워하는 학생 알려줘", "성적 낮은 학생 보여줘"]
-  },
-  {
-    "id": "ambiguous_ai_usage",
-    "type": "normal",
-    "trigger_keywords": ["AI 많이 쓴", "AI 활용", "AI 쓴"],
-    "missing_slot": "ai_usage_metric",
-    "question": "AI 활용량을 어떤 기준으로 볼까요?",
-    "options": ["ai_message_sent 횟수", "AI 글쓰기 제출 수", "AI 메시지 총 글자 수"],
-    "default_if_skipped": "ai_message_sent 횟수",
-    "examples": ["AI 많이 쓴 학생이 글쓰기 점수도 높은지 보고 싶어", "AI 활용 많이 한 학생 보여줘"]
-  },
-  {
-    "id": "ambiguous_discussion_activity",
-    "type": "normal",
-    "trigger_keywords": ["토론 활발", "토론 많이", "토론 참여"],
-    "missing_slot": "discussion_metric",
-    "question": "토론 참여를 어떤 기준으로 볼까요?",
-    "options": ["원글 수", "댓글 수", "원글 + 댓글 합계"],
-    "default_if_skipped": "원글 + 댓글 합계",
-    "examples": ["토론 활발하게 한 학생 보여줘", "토론 많이 참여한 학생 순위"]
-  },
-  {
-    "id": "ambiguous_submission_status",
-    "type": "normal",
-    "trigger_keywords": ["안 낸", "미제출", "제출 안 한", "아직 안 한"],
-    "missing_slot": "activity_type",
-    "question": "어떤 활동의 미제출을 확인할까요?",
-    "options": ["퀴즈", "글쓰기", "읽기", "전체 활동"],
-    "default_if_skipped": "전체 활동",
-    "examples": ["미제출 학생 보여줘", "아직 안 낸 학생 누구야?"]
-  },
-  {
-    "id": "ambiguous_score_comparison",
-    "type": "normal",
-    "trigger_keywords": ["비교", "차이", "더 높은", "더 낮은", "vs"],
-    "missing_slot": "comparison_target",
-    "question": "어떤 항목끼리 비교할까요?",
-    "options": ["반별 평균 점수", "과목별 평균 점수", "활동 유형별 제출률"],
-    "default_if_skipped": "반별 평균 점수",
-    "examples": ["2반이랑 3반 비교해줘", "과학이랑 국어 점수 차이 알려줘"]
+    "question": "읽기 시간은 어떤 로그를 기준으로 계산할까요?",
+    "options": ["페이지 머문 시간 합계", "페이지 머문 시간 평균"],
+    "default_if_skipped": "페이지 머문 시간 합계",
+    "priority": 10,
+    "examples": ["읽기 활동 오래 한 학생 보여줘"]
   }
 ]

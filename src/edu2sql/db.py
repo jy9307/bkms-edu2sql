@@ -26,7 +26,14 @@ def get_connection(readonly: bool = False):
     """Create a PostgreSQL connection."""
     import psycopg2
 
-    connection = psycopg2.connect(**get_db_config())
+    dsn = os.getenv("DATABASE_URL")
+    if dsn:
+        print(f"Connecting using DATABASE_URL: {dsn[:20]}...")
+        connection = psycopg2.connect(dsn)
+    else:
+        print("Connecting using individual parameters.")
+        connection = psycopg2.connect(**get_db_config())
+
     if readonly:
         connection.set_session(readonly=True, autocommit=True)
     return connection
