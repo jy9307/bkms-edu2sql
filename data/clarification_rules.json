@@ -1,0 +1,62 @@
+[
+  {
+    "id": "missing_class",
+    "trigger_keywords": ["우리 반", "학생들", "반 학생", "학생 목록", "누구"],
+    "missing_slot": "class_scope",
+    "question": "몇 학년 몇 반을 기준으로 조회할까요?",
+    "options": ["3학년 2반", "전체 학급"],
+    "default_if_skipped": "전체 학급",
+    "priority": 5,
+    "examples": ["우리 반에서 퀴즈 안 낸 학생 보여줘", "학생들 명단 알려줘"]
+  },
+  {
+    "id": "ambiguous_recent",
+    "trigger_keywords": ["최근", "요즘", "요새", "최근에"],
+    "missing_slot": "date_range",
+    "question": "\"최근\"은 어떤 기간을 의미하나요?",
+    "options": ["최근 7일", "이번 달", "가장 최근 수업"],
+    "default_if_skipped": "최근 7일",
+    "priority": 10,
+    "examples": ["최근 제출 현황 알려줘", "요즘 공부 열심히 하는 학생 누구야?"]
+  },
+  {
+    "id": "ambiguous_participation_rate",
+    "trigger_keywords": ["참여율", "참여도", "참여"],
+    "missing_slot": "participation_metric",
+    "question": "참여율을 어떤 기준으로 계산할까요?",
+    "options": ["수업 접속 기준", "활동 시작 기준", "제출 완료 기준"],
+    "default_if_skipped": "활동 시작 기준",
+    "priority": 10,
+    "examples": ["참여율 높은 수업이 뭐야?", "우리 반 참여도 보여줘"]
+  },
+  {
+    "id": "ambiguous_performance",
+    "trigger_keywords": ["잘한", "우수한", "상위", "성적이 좋은"],
+    "missing_slot": "performance_metric",
+    "question": "잘한 학생을 어떤 기준으로 볼까요?",
+    "options": ["평균 점수", "제출률", "활동 로그 수"],
+    "default_if_skipped": "평균 점수",
+    "priority": 10,
+    "examples": ["과학 수업에서 잘한 학생 보여줘", "성적이 좋은 학생 순위"]
+  },
+  {
+    "id": "ambiguous_writing_length",
+    "trigger_keywords": ["글쓰기 분량", "많이 쓴", "긴 글", "글자 수"],
+    "missing_slot": "writing_length_metric",
+    "question": "글쓰기 분량을 어떤 기준으로 계산할까요?",
+    "options": ["글자 수 합계", "평균 글자 수", "제출 글 수"],
+    "default_if_skipped": "글자 수 합계",
+    "priority": 10,
+    "examples": ["글쓰기 분량 많은 학생 순위 보여줘"]
+  },
+  {
+    "id": "ambiguous_reading_time",
+    "trigger_keywords": ["오래 읽은", "읽기 시간", "체류 시간"],
+    "missing_slot": "reading_time_metric",
+    "question": "읽기 시간은 어떤 로그를 기준으로 계산할까요?",
+    "options": ["페이지 머문 시간 합계", "페이지 머문 시간 평균"],
+    "default_if_skipped": "페이지 머문 시간 합계",
+    "priority": 10,
+    "examples": ["읽기 활동 오래 한 학생 보여줘"]
+  }
+]

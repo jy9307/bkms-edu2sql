@@ -1,0 +1,29 @@
+[
+  {
+    "id": "quiz_non_submitters_by_class",
+    "original_question": "3학년 2반에서 퀴즈를 제출하지 않은 학생은?",
+    "clarification_answers": {},
+    "resolved_question": "3학년 2반 학생 중 퀴즈 활동을 제출하지 않은 학생 목록",
+    "sql": "SELECT u.name, a.title, s.status FROM submissions s JOIN users u ON u.user_id = s.student_id JOIN activity_runs ar ON ar.run_id = s.run_id JOIN activities a ON a.activity_id = ar.activity_id WHERE u.role = 'student' AND u.grade = 3 AND u.class_number = 2 AND a.activity_type = 'quiz' AND s.status <> 'submitted';",
+    "tags": ["submission", "quiz", "student"]
+  },
+  {
+    "id": "avg_quiz_score_by_class",
+    "original_question": "3학년 2반 학생들의 평균 퀴즈 점수를 보여줘",
+    "clarification_answers": {},
+    "resolved_question": "3학년 2반 학생들의 퀴즈 평균 점수",
+    "sql": "SELECT AVG(s.score) as average_score FROM submissions s JOIN users u ON u.user_id = s.student_id JOIN activity_runs ar ON ar.run_id = s.run_id JOIN activities a ON a.activity_id = ar.activity_id WHERE u.grade = 3 AND u.class_number = 2 AND a.activity_type = 'quiz' AND s.status = 'submitted';",
+    "tags": ["score", "average", "quiz"]
+  },
+  {
+    "id": "writing_length_rank_after_clarification",
+    "original_question": "요즘 글쓰기 분량 많은 학생 보여줘",
+    "clarification_answers": {
+      "date_range": "this_month",
+      "writing_length_metric": "char_count"
+    },
+    "resolved_question": "이번 달에 글쓰기 제출 글자 수 합계가 많은 학생 순위",
+    "sql": "SELECT u.name, SUM(w.char_count) AS total_char_count FROM writing_submissions w JOIN users u ON u.user_id = w.student_id WHERE w.submitted_at >= date_trunc('month', CURRENT_DATE) GROUP BY u.user_id, u.name ORDER BY total_char_count DESC LIMIT 10;",
+    "tags": ["writing", "rank", "clarification", "date_range", "char_count"]
+  }
+]
