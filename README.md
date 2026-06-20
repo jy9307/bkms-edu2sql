@@ -1,12 +1,14 @@
 # Edu2SQL
 
+Edu2SQL is a skeleton NL2SQL project for education-domain questions. It takes a teacher-style natural language question, retrieves schema and example context, generates read-only PostgreSQL, validates it, and returns an answer.
+
 ## Getting Started
 
 ### Prerequisites
 
 - Python 3.10+
 - PostgreSQL 14+
-- OpenAI API key or Anthropic API key
+- OpenAI API key
 
 If PostgreSQL is not installed, install it first.
 
@@ -26,7 +28,7 @@ createdb --version
 
 ```bash
 git clone <repository-url>
-cd Edu2SQL
+cd bkms-edu2sql
 ```
 
 ### 2. Create environment
@@ -58,7 +60,7 @@ Fill in local secrets and database settings in `.env`.
 
 ```bash
 OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
+DATABASE_URL=postgresql:///edu2sql
 DB_HOST=
 DB_PORT=5432
 DB_NAME=edu2sql
@@ -66,7 +68,8 @@ DB_USER=
 DB_PASSWORD=
 ```
 
-On macOS/Homebrew PostgreSQL, the default database user is usually your macOS username.
+`DATABASE_URL` takes priority if it is set.
+If `DATABASE_URL` is empty, the app falls back to `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD`.
 If `DB_USER` is empty, the app uses the current OS user.
 
 ### 4. Prepare PostgreSQL database
@@ -101,29 +104,57 @@ If you installed the package with `pip install -e ".[dev]"`, you can also run:
 edu2sql-db-check
 ```
 
+### 6. Run the Streamlit app
+
+```bash
+streamlit run streamlit_app.py
+```
+
+The app shows:
+
+- Example teacher questions
+- Current DB connection status
+- Retrieved context, SQL path, DB result, and agent state
+
 ## Repository Structure
 
 ```text
 .
 +-- config/
 |   +-- default.yaml
++-- data/
++   +-- clarification_rules.json
++   +-- query_examples.json
++   +-- schema_dictionary.json
++-- docs/
++   +-- lms_database_schema_spec.md
++   +-- nl2sql_agent_flow_and_clarification.md
++   +-- nl2sql_agent_implementation_spec.md
 +-- src/
 |   +-- edu2sql/
 |       +-- __init__.py
+|       +-- agent.py
+|       +-- agent_graph.py
 |       +-- config.py
 |       +-- db.py
+|       +-- retriever.py
+|       +-- sql_validator.py
 +-- tests/
+|   +-- test_agent_flow.py
 |   +-- test_config.py
 +-- .env.example
-+-- .gitignore
 +-- environment.yml
 +-- pyproject.toml
++-- streamlit_app.py
++-- test_agent_graph_chat.py
++-- test_agent_interactive.py
++-- test_agent_real_chat.py
 +-- README.md
 ```
 
 ## Notes
 
 - Commit shared defaults in `config/default.yaml`.
-- Put personal local settings in `config/local.yaml`.
 - Put secrets in `.env`.
-- Do not commit `.env` or `config/local.yaml`.
+- Do not commit `.env`.
+- The package currently uses OpenAI for generation and PostgreSQL for execution.
