@@ -1,4 +1,3 @@
-import pytest
 from edu2sql.retriever import Retriever
 from edu2sql.sql_validator import SQLValidator
 

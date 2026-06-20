@@ -317,6 +317,62 @@
       "description": "로그인 또는 수업 입장 로그 수",
       "sql_hint": "COUNT(access_logs.access_log_id) WHERE access_logs.action IN ('login', 'join_session')"
     },
+    "수업 접속 여부": {
+      "description": "학생이 특정 수업 차시에 입장했는지 여부",
+      "sql_hint": "EXISTS 또는 COUNT(access_logs.access_log_id) WHERE access_logs.action = 'join_session' AND access_logs.session_id = sessions.session_id"
+    },
+    "활동 시작 여부": {
+      "description": "학생이 배정된 활동을 실제로 시작했는지 여부",
+      "sql_hint": "COUNT(activity_logs.log_id) WHERE activity_logs.event_type = 'activity_started'"
+    },
+    "제출 완료 여부": {
+      "description": "학생이 배정된 활동을 제출 완료했는지 여부",
+      "sql_hint": "submissions.status = 'submitted'"
+    },
+    "짧은 활동 시작": {
+      "description": "활동을 시작했지만 duration_ms가 짧아 의미 있는 참여로 보기 어려운 신호",
+      "sql_hint": "activity_logs.event_type = 'activity_started' AND activity_logs.duration_ms < 60000"
+    },
+    "활동 완료율": {
+      "description": "학생별 또는 수업별 배정 활동 중 완료/제출된 비율",
+      "sql_hint": "COUNT(submissions.submission_id) FILTER (WHERE submissions.status = 'submitted')::numeric / NULLIF(COUNT(submissions.submission_id), 0)"
+    },
+    "제출 지연 여부": {
+      "description": "활동 종료 시각 이후 제출한 기록 또는 제출하지 못한 기록",
+      "sql_hint": "submissions.submitted_at > activity_runs.ended_at OR submissions.status <> 'submitted'"
+    },
+    "활동 로그 수": {
+      "description": "학생이 남긴 활동 행동 로그 수",
+      "sql_hint": "COUNT(activity_logs.log_id)"
+    },
+    "평균 활동 시작 시각": {
+      "description": "학생이 활동을 시작한 평균 시각. 빠른 시작/늦은 시작 비교에 사용한다.",
+      "sql_hint": "AVG(EXTRACT(EPOCH FROM submissions.started_at::time)) 또는 AVG(EXTRACT(EPOCH FROM activity_logs.occurred_at::time)) WHERE event_type = 'activity_started'"
+    },
+    "평균 점수 추이": {
+      "description": "이전 기간 평균 점수와 현재 기간 평균 점수를 비교한 변화량",
+      "sql_hint": "AVG(submissions.score) FILTER (WHERE sessions.session_date < date_trunc('month', CURRENT_DATE)) 와 AVG(...) FILTER (WHERE sessions.session_date >= date_trunc('month', CURRENT_DATE)) 비교"
+    },
+    "제출률 추이": {
+      "description": "이전 기간 제출률과 현재 기간 제출률을 비교한 변화량",
+      "sql_hint": "기간별 COUNT(*) FILTER (WHERE submissions.status = 'submitted')::numeric / NULLIF(COUNT(*), 0) 비교"
+    },
+    "활동 참여량 추이": {
+      "description": "이전 기간과 현재 기간의 활동 시작/완료/로그 수 변화량",
+      "sql_hint": "기간별 COUNT(activity_logs.log_id) 또는 COUNT(*) FILTER (WHERE activity_logs.event_type = 'activity_started') 비교"
+    },
+    "수업별 평균 제출률": {
+      "description": "각 수업 차시에 속한 활동의 제출 완료 비율",
+      "sql_hint": "sessions -> activity_runs -> submissions 조인 후 session_id별 제출률 계산"
+    },
+    "수업별 평균 점수": {
+      "description": "각 수업 차시에 속한 제출 점수의 평균",
+      "sql_hint": "AVG(submissions.score) GROUP BY sessions.session_id"
+    },
+    "수업별 활동 참여량": {
+      "description": "각 수업 차시에 남은 활동 로그 또는 활동 시작 로그 수",
+      "sql_hint": "sessions -> activity_runs -> activity_logs 조인 후 COUNT(activity_logs.log_id)"
+    },
     "토론 참여량": {
       "description": "토론 글과 댓글 작성 수",
       "sql_hint": "COUNT(discussion_posts.post_id)"

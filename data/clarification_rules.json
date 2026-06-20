@@ -10,8 +10,6 @@
     "examples": ["우리 반에서 퀴즈 안 낸 학생 보여줘", "학생들 명단 알려줘"]
   },
   {
-    "id": "ambiguous_recent",
-    "trigger_keywords": ["최근", "요즘", "요새", "최근에"],
     "id": "absurd_personality",
     "type": "absurd_recoverable",
     "trigger_keywords": ["성격", "착한", "나쁜", "친구 관계", "분위기"],
@@ -34,11 +32,11 @@
   {
     "id": "absurd_emotion",
     "type": "absurd_recoverable",
-    "trigger_keywords": ["힘들어 보여", "지쳐", "스트레스", "행복", "즐거워"],
+    "trigger_keywords": ["힘들어 보여", "지쳐", "지쳐 보이는", "스트레스", "행복", "즐거워", "이상 신호"],
     "missing_slot": "engagement_metric",
-    "question": "감정 상태는 직접 알기 어렵지만, 행동 데이터로 간접적으로 볼 수 있어요. 어떤 걸 볼까요?",
-    "options": ["최근 접속 횟수", "활동 완료율", "제출 지연 여부"],
-    "default_if_skipped": "최근 접속 횟수",
+    "question": "감정 상태는 직접 알기 어렵지만, 참여 행동 데이터로 이상 신호를 볼 수 있어요. 어떤 참여 기준으로 볼까요?",
+    "options": ["수업 접속 여부", "활동 시작 여부", "제출 완료 여부", "짧은 활동 시작"],
+    "default_if_skipped": "짧은 활동 시작",
     "examples": ["요즘 힘들어 보이는 학생 있어?", "스트레스 받는 학생 알 수 있어?"]
   },
   {
@@ -60,7 +58,7 @@
   {
     "id": "absurd_moral_judgment",
     "type": "absurd_recoverable",
-    "trigger_keywords": ["게으른", "성실한", "열심히 하는", "불성실한"],
+    "trigger_keywords": ["게으른", "성실한", "열심히 하는", "불성실한", "꾸준히", "잘 따라오는", "따라오는"],
     "missing_slot": "performance_metric",
     "question": "성실함은 다양한 기준으로 볼 수 있어요. 어떤 데이터로 확인할까요?",
     "options": ["제출률", "평균 활동 시작 시각", "활동 로그 수"],
@@ -91,7 +89,7 @@
   {
     "id": "ambiguous_participation_rate",
     "type": "normal",
-    "trigger_keywords": ["참여율", "참여도", "얼마나 참여"],
+    "trigger_keywords": ["참여율", "참여도", "얼마나 참여", "제대로 참여", "참여한", "참여"],
     "missing_slot": "participation_metric",
     "question": "참여율을 어떤 기준으로 계산할까요?",
     "options": ["수업 접속 기준", "활동 시작 기준", "제출 완료 기준"],

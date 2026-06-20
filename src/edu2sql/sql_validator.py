@@ -28,20 +28,20 @@ class SQLValidator:
                 "errors": ["SQL must start with SELECT or WITH."]
             }
 
-        # 2. Check for forbidden keywords
+        # 2. Check for multiple statements
+        if ";" in sql.rstrip(";"):
+            return {
+                "valid": False,
+                "errors": ["Multiple SQL statements are not allowed."]
+            }
+
+        # 3. Check for forbidden keywords
         for keyword in FORBIDDEN_KEYWORDS:
             if re.search(rf"\b{keyword}\b", sql_upper):
                 return {
                     "valid": False,
                     "errors": [f"Forbidden keyword found: {keyword}"]
                 }
-
-        # 3. Check for multiple statements
-        if ";" in sql.rstrip(";") :
-            return {
-                "valid": False,
-                "errors": ["Multiple SQL statements are not allowed."]
-            }
 
         # 4. (Optional) Check for allowed tables
         # This is a bit complex with regex, but we can do a simple check

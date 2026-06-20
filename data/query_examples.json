@@ -25,5 +25,120 @@
     "resolved_question": "이번 달에 글쓰기 제출 글자 수 합계가 많은 학생 순위",
     "sql": "SELECT u.name, SUM(w.char_count) AS total_char_count FROM writing_submissions w JOIN users u ON u.user_id = w.student_id WHERE w.submitted_at >= date_trunc('month', CURRENT_DATE) GROUP BY u.user_id, u.name ORDER BY total_char_count DESC LIMIT 10;",
     "tags": ["writing", "rank", "clarification", "date_range", "char_count"]
+  },
+  {
+    "id": "session_participation_by_submission_after_clarification",
+    "original_question": "요즘 참여율 높은 수업 보여줘",
+    "clarification_answers": {
+      "date_range": "이번 달",
+      "participation_metric": "제출 완료 기준"
+    },
+    "resolved_question": "이번 달 수업별 배정 대비 제출 완료율이 높은 수업 순위",
+    "sql": "SELECT se.title, se.subject, se.session_date, COUNT(DISTINCT sub.submission_id) FILTER (WHERE sub.status = 'submitted')::numeric / NULLIF(COUNT(DISTINCT sub.submission_id), 0) AS submission_rate, COUNT(DISTINCT sub.submission_id) AS assigned_count FROM sessions se JOIN activity_runs ar ON ar.session_id = se.session_id LEFT JOIN submissions sub ON sub.run_id = ar.run_id WHERE se.session_date >= date_trunc('month', CURRENT_DATE) GROUP BY se.session_id, se.title, se.subject, se.session_date ORDER BY submission_rate DESC NULLS LAST, assigned_count DESC LIMIT 10;",
+    "tags": ["참여율", "제출", "수업", "최근", "요즘", "participation_metric", "date_range"]
+  },
+  {
+    "id": "session_participation_by_access_after_clarification",
+    "original_question": "우리 반 참여도 보여줘",
+    "clarification_answers": {
+      "class_scope": "3학년 2반",
+      "participation_metric": "수업 접속 기준"
+    },
+    "resolved_question": "3학년 2반 수업별 대상 학생 대비 수업 입장 비율",
+    "sql": "SELECT se.title, COUNT(DISTINCT al.user_id)::numeric / NULLIF(COUNT(DISTINCT u.user_id), 0) AS join_rate, COUNT(DISTINCT al.user_id) AS joined_students, COUNT(DISTINCT u.user_id) AS total_students FROM sessions se JOIN users u ON u.grade = se.grade AND u.class_number = se.class_number AND u.role = 'student' LEFT JOIN access_logs al ON al.session_id = se.session_id AND al.user_id = u.user_id AND al.action = 'join_session' WHERE se.grade = 3 AND se.class_number = 2 GROUP BY se.session_id, se.title ORDER BY join_rate DESC NULLS LAST LIMIT 10;",
+    "tags": ["참여도", "접속", "우리 반", "학년", "반", "participation_metric", "class_scope"]
+  },
+  {
+    "id": "struggling_students_by_recent_access_after_clarification",
+    "original_question": "요즘 힘들어 보이는 학생 있어?",
+    "clarification_answers": {
+      "date_range": "이번 달",
+      "engagement_metric": "짧은 활동 시작"
+    },
+    "resolved_question": "이번 달 활동을 시작했지만 60초 미만으로 짧게 끝난 학생 목록",
+    "sql": "SELECT u.name, COUNT(al.log_id) AS short_start_count, MIN(al.duration_ms) AS shortest_duration_ms, MAX(al.occurred_at) AS last_short_start_at FROM users u JOIN activity_logs al ON al.user_id = u.user_id WHERE u.role = 'student' AND al.event_type = 'activity_started' AND al.duration_ms < 60000 AND al.occurred_at >= date_trunc('month', CURRENT_DATE) GROUP BY u.user_id, u.name ORDER BY short_start_count DESC, shortest_duration_ms ASC LIMIT 10;",
+    "tags": ["힘들어", "스트레스", "짧은 활동 시작", "최근", "요즘", "engagement_metric", "date_range"]
+  },
+  {
+    "id": "struggling_students_by_completion_rate_after_clarification",
+    "original_question": "스트레스 받는 학생 알 수 있어?",
+    "clarification_answers": {
+      "engagement_metric": "제출 완료 여부"
+    },
+    "resolved_question": "배정된 활동 대비 제출 완료율이 낮은 학생 목록",
+    "sql": "SELECT u.name, COUNT(s.submission_id) FILTER (WHERE s.status = 'submitted')::numeric / NULLIF(COUNT(s.submission_id), 0) AS completion_rate, COUNT(s.submission_id) AS assigned_count FROM users u LEFT JOIN submissions s ON s.student_id = u.user_id WHERE u.role = 'student' GROUP BY u.user_id, u.name ORDER BY completion_rate ASC NULLS FIRST, assigned_count DESC LIMIT 10;",
+    "tags": ["힘들어", "스트레스", "활동 완료율", "제출", "engagement_metric"]
+  },
+  {
+    "id": "moral_judgment_by_submission_rate_after_clarification",
+    "original_question": "게으른 학생 알려줘",
+    "clarification_answers": {
+      "performance_metric": "제출률"
+    },
+    "resolved_question": "성실함을 직접 판단하지 않고 제출률이 낮은 학생 목록",
+    "sql": "SELECT u.name, COUNT(s.submission_id) FILTER (WHERE s.status = 'submitted')::numeric / NULLIF(COUNT(s.submission_id), 0) AS submission_rate, COUNT(s.submission_id) AS assigned_count FROM users u LEFT JOIN submissions s ON s.student_id = u.user_id WHERE u.role = 'student' GROUP BY u.user_id, u.name ORDER BY submission_rate ASC NULLS FIRST, assigned_count DESC LIMIT 10;",
+    "tags": ["게으른", "성실한", "제출률", "제출", "performance_metric"]
+  },
+  {
+    "id": "score_trend_after_prediction_clarification",
+    "original_question": "성적이 오를 가능성 있어?",
+    "clarification_answers": {
+      "performance_metric": "평균 점수 추이"
+    },
+    "resolved_question": "학생별 5월 대비 6월 평균 점수 변화",
+    "sql": "SELECT u.name, AVG(s.score) FILTER (WHERE se.session_date < date_trunc('month', CURRENT_DATE)) AS previous_avg_score, AVG(s.score) FILTER (WHERE se.session_date >= date_trunc('month', CURRENT_DATE)) AS current_avg_score, AVG(s.score) FILTER (WHERE se.session_date >= date_trunc('month', CURRENT_DATE)) - AVG(s.score) FILTER (WHERE se.session_date < date_trunc('month', CURRENT_DATE)) AS score_delta FROM users u JOIN submissions s ON s.student_id = u.user_id JOIN activity_runs ar ON ar.run_id = s.run_id JOIN sessions se ON se.session_id = ar.session_id WHERE u.role = 'student' AND s.score IS NOT NULL GROUP BY u.user_id, u.name HAVING AVG(s.score) FILTER (WHERE se.session_date < date_trunc('month', CURRENT_DATE)) IS NOT NULL AND AVG(s.score) FILTER (WHERE se.session_date >= date_trunc('month', CURRENT_DATE)) IS NOT NULL ORDER BY score_delta DESC LIMIT 10;",
+    "tags": ["예측", "가능성", "점수", "성적", "추이", "performance_metric"]
+  },
+  {
+    "id": "teacher_session_submission_rate_after_clarification",
+    "original_question": "이 선생님 잘 가르치나?",
+    "clarification_answers": {
+      "session_metric": "수업별 평균 제출률"
+    },
+    "resolved_question": "수업 퀄리티를 직접 평가하지 않고 수업별 제출률을 비교",
+    "sql": "SELECT se.title, se.subject, se.session_date, COUNT(s.submission_id) FILTER (WHERE s.status = 'submitted')::numeric / NULLIF(COUNT(s.submission_id), 0) AS submission_rate, COUNT(s.submission_id) AS assigned_count FROM sessions se JOIN activity_runs ar ON ar.session_id = se.session_id LEFT JOIN submissions s ON s.run_id = ar.run_id GROUP BY se.session_id, se.title, se.subject, se.session_date ORDER BY submission_rate DESC NULLS LAST, assigned_count DESC LIMIT 10;",
+    "tags": ["선생님", "수업", "제출률", "수업 퀄리티", "session_metric"]
+  },
+  {
+    "id": "reading_time_rank_after_clarification",
+    "original_question": "읽기 활동 오래 한 학생 보여줘",
+    "clarification_answers": {
+      "reading_time_metric": "페이지 머문 시간 합계"
+    },
+    "resolved_question": "읽기 활동 page_viewed 로그의 체류 시간 합계가 긴 학생 순위",
+    "sql": "SELECT u.name, SUM(al.duration_ms) / 1000 AS total_reading_seconds FROM activity_logs al JOIN users u ON u.user_id = al.user_id WHERE u.role = 'student' AND al.event_type = 'page_viewed' GROUP BY u.user_id, u.name ORDER BY total_reading_seconds DESC LIMIT 10;",
+    "tags": ["읽기", "오래 읽은", "체류 시간", "reading_time_metric"]
+  },
+  {
+    "id": "latest_session_participation_anomalies",
+    "original_question": "이번 수업에서 애들이 제대로 참여한 편인지 보고 싶어",
+    "clarification_answers": {
+      "participation_metric": "제출 완료 기준"
+    },
+    "resolved_question": "가장 최근 수업에서 접속, 활동 시작, 제출 완료 중 누락이 있는 학생",
+    "sql": "WITH latest_session AS (SELECT session_id, title FROM sessions WHERE grade = 3 AND class_number = 2 ORDER BY session_date DESC LIMIT 1), latest_runs AS (SELECT ar.run_id FROM activity_runs ar JOIN latest_session ls ON ls.session_id = ar.session_id), student_status AS (SELECT u.user_id, u.name, COUNT(DISTINCT acc.access_log_id) FILTER (WHERE acc.action = 'join_session') AS join_count, COUNT(DISTINCT al.log_id) FILTER (WHERE al.event_type = 'activity_started') AS start_count, COUNT(DISTINCT sub.submission_id) FILTER (WHERE sub.status = 'submitted') AS submitted_count, COUNT(DISTINCT sub.submission_id) AS assigned_count FROM users u CROSS JOIN latest_session ls LEFT JOIN access_logs acc ON acc.user_id = u.user_id AND acc.session_id = ls.session_id LEFT JOIN activity_logs al ON al.user_id = u.user_id AND al.run_id IN (SELECT run_id FROM latest_runs) LEFT JOIN submissions sub ON sub.student_id = u.user_id AND sub.run_id IN (SELECT run_id FROM latest_runs) WHERE u.role = 'student' AND u.grade = 3 AND u.class_number = 2 GROUP BY u.user_id, u.name) SELECT name, join_count, start_count, submitted_count, assigned_count FROM student_status WHERE join_count = 0 OR start_count = 0 OR submitted_count < assigned_count ORDER BY join_count ASC, submitted_count ASC, name LIMIT 20;",
+    "tags": ["이번 수업", "제대로 참여", "참여", "수업", "participation_metric"]
+  },
+  {
+    "id": "tired_student_anomaly_signals",
+    "original_question": "요즘 유난히 지쳐 보이는 애들이 있어서, 데이터로 이상 신호가 있는지 보고 싶어",
+    "clarification_answers": {
+      "date_range": "최근 7일",
+      "engagement_metric": "짧은 활동 시작"
+    },
+    "resolved_question": "최근 7일 동안 집중 어려움 payload, 짧은 활동 시작, 낮은 접속/완료를 보이는 학생",
+    "sql": "SELECT u.name, COUNT(DISTINCT al.log_id) FILTER (WHERE al.payload::jsonb ->> 'difficulty_focusing' = 'true') AS focus_signal_count, COUNT(DISTINCT al.log_id) FILTER (WHERE al.event_type = 'activity_started' AND al.duration_ms < 60000) AS short_start_count, COUNT(DISTINCT acc.access_log_id) FILTER (WHERE acc.action IN ('login', 'join_session', 'navigate')) AS recent_access_count, COUNT(DISTINCT sub.submission_id) FILTER (WHERE sub.status = 'submitted') AS submitted_count, COUNT(DISTINCT sub.submission_id) AS assigned_count FROM users u LEFT JOIN activity_logs al ON al.user_id = u.user_id AND al.occurred_at >= CURRENT_DATE - INTERVAL '7 days' LEFT JOIN access_logs acc ON acc.user_id = u.user_id AND acc.occurred_at >= CURRENT_DATE - INTERVAL '7 days' LEFT JOIN submissions sub ON sub.student_id = u.user_id WHERE u.role = 'student' AND u.grade = 3 AND u.class_number = 2 GROUP BY u.user_id, u.name HAVING COUNT(DISTINCT al.log_id) FILTER (WHERE al.payload::jsonb ->> 'difficulty_focusing' = 'true') > 0 OR COUNT(DISTINCT al.log_id) FILTER (WHERE al.event_type = 'activity_started' AND al.duration_ms < 60000) > 0 ORDER BY focus_signal_count DESC, short_start_count DESC, recent_access_count ASC LIMIT 20;",
+    "tags": ["지쳐", "지쳐 보이는", "이상 신호", "최근", "요즘", "engagement_metric"]
+  },
+  {
+    "id": "class_consistency_anomalies",
+    "original_question": "우리 반에서 꾸준히 잘 따라오는 애들이 누구인지 보고 싶어",
+    "clarification_answers": {
+      "class_scope": "3학년 2반",
+      "performance_metric": "제출률"
+    },
+    "resolved_question": "3학년 2반에서 제출률과 최근 완료 흐름이 낮아 꾸준히 따라오는지 확인이 필요한 학생",
+    "sql": "SELECT u.name, COUNT(DISTINCT sub.submission_id) FILTER (WHERE sub.status = 'submitted')::numeric / NULLIF(COUNT(DISTINCT sub.submission_id), 0) AS submission_rate, COUNT(DISTINCT sub.submission_id) FILTER (WHERE sub.status <> 'submitted') AS not_submitted_count, COUNT(DISTINCT al.log_id) FILTER (WHERE al.payload::jsonb ->> 'consistency_issue' = 'true') AS consistency_signal_count FROM users u LEFT JOIN submissions sub ON sub.student_id = u.user_id LEFT JOIN activity_logs al ON al.user_id = u.user_id AND al.occurred_at >= CURRENT_DATE - INTERVAL '7 days' WHERE u.role = 'student' AND u.grade = 3 AND u.class_number = 2 GROUP BY u.user_id, u.name HAVING COUNT(DISTINCT sub.submission_id) FILTER (WHERE sub.status <> 'submitted') > 0 OR COUNT(DISTINCT al.log_id) FILTER (WHERE al.payload::jsonb ->> 'consistency_issue' = 'true') > 0 ORDER BY submission_rate ASC NULLS FIRST, consistency_signal_count DESC, not_submitted_count DESC LIMIT 20;",
+    "tags": ["우리 반", "꾸준히", "잘 따라오는", "제출률", "class_scope", "performance_metric"]
   }
 ]
